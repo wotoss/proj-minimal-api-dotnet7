@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using proj_minimal_api_dotnet7.DTOs;
 using proj_minimal_api_dotnet7.Models;
 using proj_minimal_api_dotnet7.ModelView;
+using Microsoft.AspNetCore.Http;
 
 namespace proj_minimal_api_dotnet7;
 
@@ -253,6 +254,97 @@ public class Startup
       .WithTags("Clientes");
 
 
+      //montando o método patch
+      //estou recebendo o (id e o nomeclienteDTO)
+      app.MapPatch("/clientes/{id}", ([FromRoute] int id, [FromBody] ClienteNomeDTO clienteNomeDTO) =>
+      {
+
+     if(string.IsNullOrEmpty(clienteNomeDTO.Nome))
+       {
+            // return Results.BadRequest(new Error
+            // {
+            //   Codigo = 123,
+            //   Mensagem = "O Nome é obrigatório"
+            // });
+        }
+
+        /*
+        TODO fazer update cliente
+        */
+        
+
+        var cliente = new Cliente();
+        //return Results.OK(cliente);
+       })
+        //Pode me retornar um 200Ok se deu tudo certo
+      .Produces<Cliente>(StatusCodes.Status200OK)
+      //Pode me retornar um 404 caso ele não ache o id
+      .Produces<Error>(StatusCodes.Status404NotFound)
+      //Pode me retornar um 400 BadRequest caso ele não passe na validação.
+      .Produces<Error>(StatusCodes.Status400BadRequest)
+      //aqui eu tenho um tipo de rota chamado (PutClientes)
+      .WithName("PatchClientes")
+      //aqui eu tenho a tag onde eu monto os meus grupos (Clientes)
+      .WithTags("Clientes");
+
+      
+
+
+      //montanto o método Delete
+      //estou recebendo o paramentro lá do meu teste
+      app.MapDelete("/clientes/{id}", ([FromRoute] int id) => 
+      {
+         if(id == 4)
+         {
+           return Results.NotFound(new Error
+           {
+            //passo um codido especifico 12
+             Codigo = 12,
+             Mensagem = "Cliente não encontrado"
+           });
+         }
+         //TODO fazer a implementação para excluir da base de dados.
+         return Results.NoContent();
+      }) 
+
+      //As possibilidades de retorno
+      .Produces<Cliente>(StatusCodes.Status204NoContent)
+      .Produces<Error>(StatusCodes.Status404NotFound)
+      .WithName("BuscaClientes")
+      .WithTags("Clientes");
+
+
+      //fazer o get de um objeto só
+      app.MapGet("/clientes/{id}", ([FromRoute] int id) => 
+      {
+         if(id == 4)
+         {
+           return Results.NotFound(new Error
+           {
+            //passo um codido especifico 12
+             Codigo = 12,
+             Mensagem = "Cliente não encontrado"
+           });
+         }
+         //TODO fazer a implementação para excluir da base de dados.
+         return Results.Ok(new Cliente()
+         {
+            Id = 1,
+            Nome = "Yam",
+            Telefone = "(11) 94704-7361",
+            Email = "wotoss10gmail.com"
+         });
+      }) 
+
+      //As possibilidades de retorno
+      .Produces<Cliente>(StatusCodes.Status204NoContent)
+      .Produces<Error>(StatusCodes.Status404NotFound)
+      .WithName("GetClientesPorId")
+      .WithTags("Clientes");
+
+
+
+
     //TODO FAZER A ROTA PATH "com ViewModel"
     //TODO FAZER A ROTA DELETE 
     //TODO FAZER A ROTA GET CLIENTE POR ID "retorna só o cliente"
@@ -260,6 +352,13 @@ public class Startup
     //TODO fazer testes request 
     //TODO fazer testes com postman ou insomminia
     //TODO fazer testes via curl
+
+    /*
+    * fazendo estes testes de integração na api
+    * eu não preciso utilizar insominia, postman, swagger.
+
+    * => a minha classe startup neste contexto minimal api faz o papel de controlador.
+    */
 
   }
   //#endregion
