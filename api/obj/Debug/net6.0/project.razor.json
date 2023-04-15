@@ -1,0 +1,20 @@
+{
+  "SerializedFilePath": "c:\\projeto-desenvolvimento-minimal-api\\proj_minimal_api_dotnet7\\api\\obj\\Debug\\net6.0\\project.razor.json",
+  "FilePath": "c:\\projeto-desenvolvimento-minimal-api\\proj_minimal_api_dotnet7\\api\\proj_minimal_api_dotnet7.csproj",
+  "Configuration": {
+    "ConfigurationName": "MVC-3.0",
+    "LanguageVersion": "6.0",
+    "Extensions": [
+      {
+        "ExtensionName": "MVC-3.0"
+      }
+    ]
+  },
+  "ProjectWorkspaceState": {
+    "TagHelpers": [],
+    "CSharpLanguageVersion": 1000
+  },
+  "RootNamespace": "proj_minimal_api_dotnet7",
+  "Documents": [],
+  "SerializationFormat": "0.3"
+}

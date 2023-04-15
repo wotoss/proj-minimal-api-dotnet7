@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\proj_minimal_api_dotnet7.props" />
+</Project>
