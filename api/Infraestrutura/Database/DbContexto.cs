@@ -1,7 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using proj_minimal_api_dotnet7.Models;
-namespace proj_minimal_api_dotnet7.Database;
+
+
+namespace proj_minimal_api_dotnet7.Infraestrutura.Database;
 
 //aqui eu inicio a classe de contexto
 //melhor documentação para trabalhar com entity-frameork

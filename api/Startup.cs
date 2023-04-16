@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using proj_minimal_api_dotnet7.DTOs;
 using proj_minimal_api_dotnet7.Models;
 using proj_minimal_api_dotnet7.ModelView;
-using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
-using proj_minimal_api_dotnet7.Database;
+using proj_minimal_api_dotnet7.Infraestrutura.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace proj_minimal_api_dotnet7;
