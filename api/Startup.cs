@@ -3,6 +3,9 @@ using proj_minimal_api_dotnet7.DTOs;
 using proj_minimal_api_dotnet7.Models;
 using proj_minimal_api_dotnet7.ModelView;
 using Microsoft.AspNetCore.Http;
+using Microsoft.OpenApi.Models;
+using proj_minimal_api_dotnet7.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace proj_minimal_api_dotnet7;
 
@@ -20,7 +23,21 @@ public class Startup
         services.AddControllers();
         services.AddEndpointsApiExplorer();
        
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(c =>
+        {
+          c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minimal API", Version="v1"});
+        });
+
+        services.AddEndpointsApiExplorer();
+        
+        //vou utilizar a minha string de conexão da minha variavel de ambente 
+        //se eu coloco variavel de ambiente eu tenho ue configurar o meu sistema operacional 
+        //para lêr os dados.DATABASE_URL_MINIMAL_API
+        string? conexao = Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
+        services.AddDbContext<DbContexto>( options =>
+        {//options.UseSqlServer(conexao, ServerVersion.AutoDetect(conexao));
+           options.UseSqlServer(conexao);
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -342,7 +359,7 @@ public class Startup
       .WithName("GetClientesPorId")
       .WithTags("Clientes");
 
-
+      
 
 
     //TODO FAZER A ROTA PATH "com ViewModel"

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace proj_minimal_api_dotnet7.DTOs;
 //namespace api2;
 
@@ -17,9 +19,11 @@ public record ClienteDTO
  * eu não vou passar o Id,  por ser um modelo. Como estou enivando
  * no (verbo post) ele criará o Id automaticamente. 
  */ 
-  public string? Nome {get; set;}
+ [Required]
+  public string? Nome {get; set;} 
 
-  public string? Telefone {get; set;}
+ [Required]
+  public string? Telefone {get; set;} 
 
   public string? Email {get; set;}
 }
