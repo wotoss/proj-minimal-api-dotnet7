@@ -5,6 +5,8 @@ using proj_minimal_api_dotnet7.ModelView;
 using Microsoft.OpenApi.Models;
 using proj_minimal_api_dotnet7.Infraestrutura.Database;
 using Microsoft.EntityFrameworkCore;
+using proj_minimal_api_dotnet7.Servicos;
+using proj_minimal_api_dotnet7.Infraestrutura.Interfaces;
 
 namespace proj_minimal_api_dotnet7;
 
@@ -37,6 +39,21 @@ public class Startup
         {//options.UseSqlServer(conexao, ServerVersion.AutoDetect(conexao));
            options.UseSqlServer(conexao);
         });
+        
+        /*
+           desta forma eu consigo utilizar clientesServico direto em minhas rotas
+           com AddScoped eu estou dizendo que quem vai resolver este
+           contrato => IBancoDeDadosServico<Cliente> será este srviço =>  ClientesServico
+           desta forma eu não estou trabalhando direto com a implementação ClientesServico
+           e sim com o contrato => IBancoDeDadosServico<Cliente>
+        */
+        /*
+          1º Quano eu mostro que esta é a minha interface => IBancoDeDadosServico<Cliente>
+          2º e este é o meu objeto => ClientesServico
+          3º e que este objeto => ClientesServico recebe por injeção no construtor este DbContexto
+          4º o C# faz tudo quando eu coloco ele no => AddScoped
+        */
+        services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServico>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -140,28 +157,19 @@ public class Startup
   //montagem de implementação verbo post
   public void MapRoutesClientes(IEndpointRouteBuilder app)
   {
+    /*
+    * Importante: este  (ClientesServico clientesServico) eu não estou
+    recebendo como parametro. Eu estou injetando ele direto na minha rota
 
-    app.MapGet("/clientes", () =>
+    * preciso colocar [FromServices] para o C# utilizar ou resolver a denpendencia
+    Lembrando que passo no meu scoped => services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServico>();
+      desta forma eu não estou trabalhando direto com a implementação ClientesServico
+      e sim com o contrato => IBancoDeDadosServico<Cliente>
+    */
+    app.MapGet("/clientes", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico) =>
     {
       //criar uma (objeto dynamic ou new) para criar uma lista vazia
-      var clientes = new List<Cliente>();
-
-      /*
-      * vou fazer um retorno mocado de clientes
-      * 1º eu crio a instância Cliente 
-      * 2º depois eu passo valores conforme a propriedade
-      * 3º Não posso esquecer de dar o Add
-      */
-      clientes.Add(new Cliente()
-      {
-         Id = 1,
-         Nome = "woto",
-         Email = "wotoss10@gmail.com",
-         Telefone = "(11) 94704-7361"
-      });
-
-
-      //var clientes = ClientesSevice.Todos();
+      var clientes = await clientesServico.Todos();
       return Results.Ok(clientes);
 
     })
@@ -173,7 +181,7 @@ public class Startup
     //vou decorar via anottion anotação (FromBody) para facilitar para minha aplicação
     //estou dizendo que vou receber esta informação
     //não é via [Post, Get, Form] é via [body] ou seja no corpo da mensagem
-    app.MapPost("/clientes", ([FromBody] ClienteDTO clienteDTO) =>
+    app.MapPost("/clientes", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromBody] ClienteDTO clienteDTO) =>
      {
        /*
        estamos recebendo o cliente da view, html, formulario por parametro (clienteDTO)
@@ -194,7 +202,7 @@ public class Startup
        };
 
        //usando service 
-       //ClienteService.Salvar(cliente);
+       await clientesServico.Salvar(cliente);
 
        //Quando eu faço um post eu estou criando (Created) uma informação 
        //no return create passo a minha rota com Id do cliente especifico
@@ -222,40 +230,31 @@ public class Startup
     * 1º esta minha representação /clientes/{id}, tem que ser igual ao ([FromRoute] int id
     * 2º vou receber tambem o meu objeto de transferencia DTO pelo corpo da minha aplicação [FromBody] ClienteDTO clienteDTO)
     */
-    app.MapPut("/clientes/{id}", ([FromRoute] int id, [FromBody] ClienteDTO clienteDTO) =>
+    app.MapPut("/clientes/{id}", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromRoute] int id, [FromBody] ClienteDTO clienteDTO) =>
      {
-
-       if (string.IsNullOrEmpty(clienteDTO.Nome))
+      //validação
+      //caso não ache meu cliente na base de dados.
+      var clienteDb = await clientesServico.BuscaPorId(id);
+      if(clienteDb is null)
+      {
+        //se eu não achar o meu cliente na bd eu retorno esta msg de error
+         return Results.NotFound(new Error
+          {
+             Codigo = 423,
+             Mensagem = $"Cliente não encontrado com o id {id}"
+          });
+      }
+       
+       //caso eu ache o meu cliente eu faço o update dele.
+       var cliente = new Cliente
        {
-         return Results.BadRequest(new Error
-         {
-           Codigo = 12345,
-           Mensagem = "É preciso enviar o nome ele é obrigatório"
-         });
-       }
+        Id = id, //este é o id que eu passei por parametro [FromRoute] int id,
+        Nome = clienteDTO.Nome,
+        Telefone = clienteDTO.Telefone,
+        Email = clienteDTO.Email,
+       };
 
-
-       /*
-       var cliente = ClienteService.BuscaPorId(id);
-       if(cliente == null)
-       {
-         return Results.NotFound(
-           new Error {
-             Codigo = 1234, 
-             Mensagem = "Você passou um cliente inesistente"
-           }
-         )
-       }
-       cliente.Nome =clienteDTO.Nome;
-       cliente.Telefone = clienteDTO.Telefone;
-       cliente.Email = clienteDTO.Email;
-       ClienteService.Update(cliente);
-       */
-
-       var cliente = new Cliente();
-       /*
-        * veja que o retorno eu mudo para Ok quero dizer foi atualizado
-       */
+       await clientesServico.Salvar(cliente);
        return Results.Ok(cliente);
      })
       //Pode me retornar um 200Ok se deu tudo certo
@@ -272,25 +271,26 @@ public class Startup
 
       //montando o método patch
       //estou recebendo o (id e o nomeclienteDTO)
-      app.MapPatch("/clientes/{id}", ([FromRoute] int id, [FromBody] ClienteNomeDTO clienteNomeDTO) =>
+      app.MapPatch("/clientes/{id}", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromRoute] int id, [FromBody] ClienteNomeDTO clienteNomeDTO) =>
       {
 
-     if(string.IsNullOrEmpty(clienteNomeDTO.Nome))
-       {
-            // return Results.BadRequest(new Error
-            // {
-            //   Codigo = 123,
-            //   Mensagem = "O Nome é obrigatório"
-            // });
-        }
+      //caso não ache meu cliente na base de dados.
+      var clienteDb = await clientesServico.BuscaPorId(id);
+      if(clienteDb is null)
+      {
+        //se eu não achar o meu cliente na bd eu retorno esta msg de error
+         return Results.NotFound(new Error
+          {
+             Codigo = 2345,
+             Mensagem = $"Cliente não encontrado com o id {id}"
+          });
+      }
+       
+       clienteDb.Nome = clienteNomeDTO.Nome;
 
-        /*
-        TODO fazer update cliente
-        */
+       await clientesServico.Salvar(clienteDb);
+       return Results.Ok(clienteDb);
         
-
-        var cliente = new Cliente();
-        //return Results.OK(cliente);
        })
         //Pode me retornar um 200Ok se deu tudo certo
       .Produces<Cliente>(StatusCodes.Status200OK)
@@ -308,18 +308,22 @@ public class Startup
 
       //montanto o método Delete
       //estou recebendo o paramentro lá do meu teste
-      app.MapDelete("/clientes/{id}", ([FromRoute] int id) => 
+      app.MapDelete("/clientes/{id}", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromRoute] int id) => 
       {
-         if(id == 4)
-         {
-           return Results.NotFound(new Error
-           {
-            //passo um codido especifico 12
-             Codigo = 12,
-             Mensagem = "Cliente não encontrado"
-           });
-         }
-         //TODO fazer a implementação para excluir da base de dados.
+      //caso não ache meu cliente na base de dados.
+      var clienteDb = await clientesServico.BuscaPorId(id);
+      if(clienteDb is null)
+      {
+        //se eu não achar o meu cliente na bd eu retorno esta msg de error
+         return Results.NotFound(new Error
+          {
+             Codigo = 22345,
+             Mensagem = $"Cliente não encontrado com o id {id}"
+          });
+      }
+
+        await clientesServico.Excluir(clienteDb);
+         
          return Results.NoContent();
       }) 
 
@@ -331,34 +335,27 @@ public class Startup
 
 
       //fazer o get de um objeto só
-      app.MapGet("/clientes/{id}", ([FromRoute] int id) => 
+      app.MapGet("/clientes/{id}", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromRoute] int id) => 
       {
-         if(id == 4)
-         {
-           return Results.NotFound(new Error
+        var clienteDb = await clientesServico.BuscaPorId(id);
+           if(clienteDb is null)
            {
-            //passo um codido especifico 12
-             Codigo = 12,
-             Mensagem = "Cliente não encontrado"
-           });
-         }
-         //TODO fazer a implementação para excluir da base de dados.
-         return Results.Ok(new Cliente()
-         {
-            Id = 1,
-            Nome = "Yam",
-            Telefone = "(11) 94704-7361",
-            Email = "wotoss10gmail.com"
-         });
-      }) 
-
+             //se eu não achar o meu cliente na bd eu retorno esta msg de error
+             return Results.NotFound(new Error
+               {
+                 Codigo = 21345,
+                 Mensagem = $"Cliente não encontrado com o id {id}"
+               });
+           }
+          
+          return Results.Ok(clienteDb);
+          //return Results.OK(clienteDb);
+        })
       //As possibilidades de retorno
       .Produces<Cliente>(StatusCodes.Status204NoContent)
       .Produces<Error>(StatusCodes.Status404NotFound)
       .WithName("GetClientesPorId")
       .WithTags("Clientes");
-
-      
 
 
     //TODO FAZER A ROTA PATH "com ViewModel"

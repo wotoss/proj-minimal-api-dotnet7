@@ -44,14 +44,25 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
     //se ele não for nulo eu posso remover
     if (cliente is not null) 
     {
-      this.dbContexto.Clientes.Remove(cliente);
-      await this.dbContexto.SaveChangesAsync();
+      await Excluir(cliente);
     }
   }
 
-  public async Task<List<Cliente>> BuscaPorId(int id)
+  public async Task Excluir(Cliente cliente)
   {
-    return await this.dbContexto.Clientes.Where(c => c.Id == id).ToListAsync();
+    /*
+    com este excluir eu melhoro a performace 
+    eu não preciso buscar por id na base de dados 
+    eu excluo direto o objeto
+    */
+      this.dbContexto.Clientes.Remove(cliente);
+      await this.dbContexto.SaveChangesAsync();
+    
+  }
+
+  public async Task<Cliente> BuscaPorId(int id)
+  {
+    return await this.dbContexto.Clientes.Where(c => c.Id == id).FirstAsync();
   }
 
 
