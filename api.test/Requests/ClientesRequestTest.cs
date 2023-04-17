@@ -2,10 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Api.Test.Helpers;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using proj_minimal_api_dotnet7.DTOs;
-using proj_minimal_api_dotnet7;
 using proj_minimal_api_dotnet7.Models;
 
 namespace api.test.Requests;
@@ -14,21 +11,46 @@ namespace api.test.Requests;
 public class ClientesRequestTest
 {
 [ClassInitialize]
-  public static void ClassInit(TestContext testContext)
+  public static async Task ClassInit(TestContext testContext)
   {
     Setup.ClassInit(testContext);
+    /*
+     * 1º toda vez que a applicação iniciar em modo teste
+     ela vai dar um (tuncate) na tabela (clientes)
+     isto fará com que zere a tabela.
+
+     Lembrando que estou fazendo na (força bruta de forma implicita)
+      Database.ExecuteSqlRaw("truncate table clientes")
+
+      2º Lá na pasta Helper do meu (api.test) eu tenho o arquivo ou Classe Setup.cs
+      nesta classe eu tenho um método (genérico) que pode receber todas as execuções em sql
+      Este método é Setup.ExecultaComandoSql(string sql). Lá no meu Setup.cs
+
+      3º Apenas envio por parametro a String que eu quero que execulte.
+
+    */
+    await Setup.ExecutaComandoSql("truncate table clientes");
   }
 
 [ClassCleanup]
-  public static void ClassCleanup()
+  public static async Task ClassCleanup()
   {
     Setup.ClassCleanup();
+    /*
+     vou fazer um truncate quando eu inicio ([ClassInitialize]) os teste
+     e um outro truncate aqui [ClassCleanup] quando eu finalizo 
+    */
+    await Setup.ExecutaComandoSql("truncate table clientes");
   }
 
 
     [TestMethod]
     public async Task GetDeClientesEmTeste()
-    {      
+    {  
+        //Eu estou criando um usuário fake para teste
+        //O método (FakeClientes()) esta lá no meu Setup
+       await Setup.FakeCliente();
+
         //vou fazer uma requisição para minha home e o retorno é 200
         var response = await Setup.client.GetAsync("/clientes");
 
@@ -62,6 +84,7 @@ public class ClientesRequestTest
      [TestMethod]
      public async Task PostDeClientesEmTeste()
      {
+      await Setup.ExecutaComandoSql("truncate table clientes");
          /*
          * 1º para fazer o post crio a instância do meu objeto cliente
          * 2º passo os valores
@@ -99,6 +122,9 @@ public class ClientesRequestTest
          });
          Assert.IsNotNull(clienteResponse);
          Assert.IsNotNull(clienteResponse.Id);
+         //estou dizendo que meu Id é igual 1
+         //pois sempre só terei um na base de dados.
+         Assert.AreEqual(1, clienteResponse.Id); 
          
       }
 
@@ -122,6 +148,10 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task PutClientesPassandoPeloTeste()
     {
+     await Setup.ExecutaComandoSql("truncate table clientes");
+     await Setup.FakeCliente(); 
+     var qtdInicial = await Setup.ExecutaEntityCount(1, "Livia");
+     Assert.AreEqual(1, qtdInicial);
       /*
       * 1º envio o objeto que será serializado
       * 2º lembrando que nesta instância eu estou passando o ClienteDTO
@@ -160,13 +190,24 @@ public class ClientesRequestTest
           PropertyNameCaseInsensitive = true
          });
          Assert.IsNotNull(clienteResponse);
-         Assert.IsNotNull(clienteResponse.Id);         
+         //o id é 1 pois só tenho um cliente na bass de dados.
+         Assert.AreEqual(1, clienteResponse.Id);   
+
+         Assert.AreEqual("woto", clienteResponse.Nome); 
+
+         /*
+         vou execultar uma query sql na base de dados para ver se meu conteudo 
+         foi realmente alterado.
+         */
+         var qtdFinal = await Setup.ExecutaEntityCount(1, "woto");
+         Assert.AreEqual(1, qtdFinal);     
 
     }
 
     [TestMethod]
     public async Task PutClientesSemNome()
     {
+      await Setup.FakeCliente();
       //estou passando o objeto DTO sem a propriedade nome 
       //então eu espero um erro BadRequest
       var clienteSemNome = new ClienteDTO()
@@ -189,6 +230,7 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task DeleteClientes()
     {
+      await Setup.FakeCliente();
       var response = await Setup.client.DeleteAsync($"/clientes/{1}");
       Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
       //não preciso testar o retorno porque se NoContent ele não tem retorno.
@@ -198,7 +240,13 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task DeleteClientesIdNaoExistente()
     {
-      var passandoIdInvalido = await Setup.client.DeleteAsync($"/clientes/{4}");
+      await Setup.ExecutaComandoSql("truncate table clientes");
+      /*
+        passando o usuario fake para minha base de dados 
+        para ter o que buscar, por id 
+      */
+      await Setup.FakeCliente();
+      var passandoIdInvalido = await Setup.client.DeleteAsync($"/clientes/{5}");
       Assert.AreEqual(HttpStatusCode.NotFound, passandoIdInvalido.StatusCode);
     }
 /*
@@ -230,6 +278,14 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task GetPorId()
     {
+
+      await Setup.ExecutaComandoSql("truncate table clientes");
+      /*
+        sempre construindo meu usuario fake
+        e limpando a base de dados na sequencia em minha 
+        classe Staturp.cs =>(fazendo o truncate)
+      */
+      await Setup.FakeCliente();
       var response = await Setup.client.GetAsync($"/clientes/{1}");
       Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }

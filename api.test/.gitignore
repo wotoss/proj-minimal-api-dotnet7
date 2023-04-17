@@ -9,7 +9,7 @@ obj/
 #Este fica na maquina local é apenas para teste a ConnectionString
 #O VsCode não esta reconhecendo a variavel de ambiente
 #Por este motivo eu fiz a ConnectionString
-appsettings.Test.json
+appsettings.json
 
 # Common node modules locations
 /node_modules

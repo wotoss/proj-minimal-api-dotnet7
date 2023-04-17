@@ -1,0 +1,2 @@
+export DATABASE_URL_MINIMAL_API="Data Source=DESKTOP-VUJK6QA\\SQLEXPRESS;Initial Catalog=minimal_api_dotnet7_test;Persist Security Info=True;Integrated Security=SSPI; TrustServerCertificate=True"
+dotnet test # compila, sobe servidor, roda test

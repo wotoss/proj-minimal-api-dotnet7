@@ -16,8 +16,58 @@ public class Startup
     {
         Configuration = configuration;
     }
+     /*
+      esta variavel (public static IConfiguration?) ela é (static)
+      então eu posso utiliza-la ou compartilhar, lá no arquivo =>  (DbContextoTeste.cs) 
+      Como esta só com public (public IConfiguration Configuration { get; set; })
+    eu não conseguia
+       Lembrando que por ele ter ficado (static) eu uso atraves da classe (Startup.Configuration)
+    */
+    public IConfiguration? Configuration { get; set; }
+    
+    public static string? StrConexao(IConfiguration? Configuration = null)
+    {
+        
+        //vou utilizar a minha string de conexão da minha variavel de ambente 
+        //se eu coloco variavel de ambiente eu tenho ue configurar o meu sistema operacional 
+        //para lêr os dados.DATABASE_URL_MINIMAL_API
+        
+        // ======= [Dá prioridade ao appsettings] ======
+        /*
+          if(Configuration is not null)//recurso dotnet7 is null
+          {
+             return Configuration?.GetConnectionString("Conexao");
+          }
+          return Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
+        */
+        
+         string? conexao = Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
+         if(conexao is null)//recurso dotnet7 is null
+          {
+             conexao = Configuration?.GetConnectionString("Conexao");
+          }
+         return conexao;
+    }
 
-    public IConfiguration Configuration { get;set; }
+
+    /*
+     Crio um método (StrConexao()) onde eu busco a StringDeConexao
+     Este método é statico e eu posso compartilhar entre a aplicação
+     Lembrando: e para chamar em outras partes do projeto eu utilizo a classe Startup.StrConexao
+    */
+    // public string? StrConexao()
+    // {
+    //     //vou utilizar a minha string de conexão da minha variavel de ambente 
+    //     //se eu coloco variavel de ambiente eu tenho ue configurar o meu sistema operacional 
+    //     //para lêr os dados.DATABASE_URL_MINIMAL_API
+    //     string? conexao = Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
+    //     if(conexao is null)//recurso dotnet7 is null
+    //     {
+    //        conexao = Configuration?.GetConnectionString("Conexao");
+    //     }
+    //     return conexao;
+    // }
+    
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -31,14 +81,8 @@ public class Startup
 
         services.AddEndpointsApiExplorer();
         
-        //vou utilizar a minha string de conexão da minha variavel de ambente 
-        //se eu coloco variavel de ambiente eu tenho ue configurar o meu sistema operacional 
-        //para lêr os dados.DATABASE_URL_MINIMAL_API
-        string? conexao = Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
-        if(conexao is null)//recurso dotnet7 is null
-        {
-           conexao = Configuration.GetConnectionString("Conexao");
-        }
+        //estou passando o método (StrConexao()) que construi para buscar a conexão 
+        var conexao = StrConexao(Configuration);
         services.AddDbContext<DbContexto>( options =>
         {//options.UseSqlServer(conexao, ServerVersion.AutoDetect(conexao));
            options.UseSqlServer(conexao);
@@ -236,6 +280,16 @@ public class Startup
     */
     app.MapPut("/clientes/{id}", async ([FromServices] IBancoDeDadosServico<Cliente> clientesServico, [FromRoute] int id, [FromBody] ClienteDTO clienteDTO) =>
      {
+        if(string.IsNullOrEmpty(clienteDTO.Nome))
+        {
+          //se eu não achar o meu cliente na bd eu retorno esta msg de error
+          return Results.NotFound(new Error
+            {
+              Codigo = 12345,
+              Mensagem = "O Nome é obrigatório"
+            });
+        }//12345
+
       //validação
       //caso não ache meu cliente na base de dados.
       var clienteDb = await clientesServico.BuscaPorId(id);
@@ -247,19 +301,16 @@ public class Startup
              Codigo = 423,
              Mensagem = $"Cliente não encontrado com o id {id}"
           });
-      }
+      }      
        
        //caso eu ache o meu cliente eu faço o update dele.
-       var cliente = new Cliente
-       {
-        Id = id, //este é o id que eu passei por parametro [FromRoute] int id,
-        Nome = clienteDTO.Nome,
-        Telefone = clienteDTO.Telefone,
-        Email = clienteDTO.Email,
-       };
+       //o cliente que esta vindo da base de dados (clienteDb)
+        clienteDb.Nome = clienteDTO.Nome;
+        clienteDb.Telefone = clienteDTO.Telefone;
+        clienteDb.Email = clienteDTO.Email;
 
-       await clientesServico.Salvar(cliente);
-       return Results.Ok(cliente);
+       await clientesServico.Salvar(clienteDb);
+       return Results.Ok(clienteDb);
      })
       //Pode me retornar um 200Ok se deu tudo certo
       .Produces<Cliente>(StatusCodes.Status200OK)

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using proj_minimal_api_dotnet7;
+using proj_minimal_api_dotnet7.Infraestrutura.Database;
 
 namespace Api.Test.Helpers;
 
@@ -21,7 +23,36 @@ public class Setup
     
     //quando for paramentros ou propriedade privadas usamos _
     public static HttpClient client = default!;
+    
+    /*
+      1º estou fazendo um método genérico que recebe um parametro que seria 
+      (string ou comando sql)  
+       2º execultar comandos sql de forma generica
+     em toda a aplicação (api.teste) caso precise
+    */
+    public static async Task ExecutaComandoSql(string sql)
+      {
+        await new DbContexto().Database.ExecuteSqlRawAsync(sql);
+      } 
 
+    /*
+    * este termos como retorno um int 
+    * a nossa string que esta vindo por paramentro ou noss comando
+    * é um count => 
+    */
+     public static async Task<int> ExecutaEntityCount(int id, string nome)
+      {
+        return await new DbContexto().Clientes.Where(c => c.Id == id && c.Nome == nome).CountAsync();
+      }
+
+
+    public static async Task FakeCliente()
+    {
+      await new DbContexto().Database.ExecuteSqlRawAsync("""
+      insert clientes(Nome, Telefone, Email, DataCriacao)
+      values('Livia', '(11) 94704-7361', 'liviass@gmail.com', '2023-04-17 06:09:00')
+      """);
+    } 
 
      //[ClassInitialize]
     public static void ClassInit(TestContext testContext)
@@ -51,6 +82,4 @@ public class Setup
     {
       Setup.http.Dispose();
     }
-
-
 }

@@ -60,9 +60,14 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
     
   }
 
-  public async Task<Cliente> BuscaPorId(int id)
+  public async Task<Cliente?> BuscaPorId(int id)
   {
-    return await this.dbContexto.Clientes.Where(c => c.Id == id).FirstAsync();
+    /* 1º estava dando erro quando era nulo com o First()
+     * 2º para corrigir este retorno, coloquei FirstOrDefaultAsync, ele dá um retorno com null
+     * 3º e tambem passei as (?).
+    */
+    Cliente? clientes = await this.dbContexto.Clientes.Where(c => c.Id == id).FirstOrDefaultAsync();
+    return clientes;
   }
 
 

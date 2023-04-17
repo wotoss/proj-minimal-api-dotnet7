@@ -11,6 +11,7 @@ namespace proj_minimal_api_dotnet7.Infraestrutura.Database;
 
 public class DbContexto : DbContext
 {
+  public DbContexto (){}
 
   /*
    *1º passo o meu proprio de DbContexto para o meu construtor 
@@ -19,6 +20,17 @@ public class DbContexto : DbContext
    *3º ele vai passar options para classe (base) ou seja para minha herança (DbContext)
   */
   public DbContexto(DbContextOptions<DbContexto> options) : base(options){}
+
+   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+      /*
+       * 1º estou trazendo lá da minha (Classe Startup) o método (StrConexao())
+       * 2º Lembrando que para trafegar este método static eu preciso utilizar Classe (Startup.StrConexao());
+      */
+      var conexao = Startup.StrConexao();
+      optionsBuilder.UseSqlServer(conexao);      
+    }
+
 
   //para mapear os meus modelos e criar tabela no banco de dados
   //quando eu quero que uma propriedade minha não seja nulla (= default!)
