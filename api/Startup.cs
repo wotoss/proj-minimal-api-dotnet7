@@ -17,7 +17,7 @@ public class Startup
         Configuration = configuration;
     }
 
-    public IConfiguration? Configuration { get;set; }
+    public IConfiguration Configuration { get;set; }
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -35,6 +35,10 @@ public class Startup
         //se eu coloco variavel de ambiente eu tenho ue configurar o meu sistema operacional 
         //para lêr os dados.DATABASE_URL_MINIMAL_API
         string? conexao = Environment.GetEnvironmentVariable("DATABASE_URL_MINIMAL_API");
+        if(conexao is null)//recurso dotnet7 is null
+        {
+           conexao = Configuration.GetConnectionString("Conexao");
+        }
         services.AddDbContext<DbContexto>( options =>
         {//options.UseSqlServer(conexao, ServerVersion.AutoDetect(conexao));
            options.UseSqlServer(conexao);
