@@ -78,6 +78,25 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
     return await this.dbContexto.Clientes.ToListAsync();
   }
 
+  public async Task Update(Cliente clientePara, object clienteDe)
+  {
+    if(clientePara.Id == 0)
+    throw new Exception("Id de cliente é obrigatório");
+    //pegando todas as propriedade do objeto clienteDe
+    //eu vou colocar no clientePara
+    foreach(var propDe in clienteDe.GetType().GetProperties())
+    {
+       var propPara = clientePara.GetType().GetProperty(propDe.Name);
+       if(propPara is not null)
+       {
+          propPara.SetValue(clientePara, propPara.GetValue(clienteDe));
+       }
+    }
+    this.dbContexto.Clientes.Update(clientePara);
+    await this.dbContexto.SaveChangesAsync();
+  }
+  
+
   /*
   * 1º para fazer a implementação de todos os métodos para a base de dados
   eu não utilizo nem (viewModel e DTO)
@@ -87,7 +106,7 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
   inclusive as sensiveis. Desta forma eu utilizo a (classe)    
   */
 
-
+  
 
 
 }

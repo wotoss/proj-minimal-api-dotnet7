@@ -1,8 +1,12 @@
+using Api.Test.Mock;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using proj_minimal_api_dotnet7;
 using proj_minimal_api_dotnet7.Infraestrutura.Database;
+using proj_minimal_api_dotnet7.Infraestrutura.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using proj_minimal_api_dotnet7.Models;
 
 namespace Api.Test.Helpers;
 
@@ -67,7 +71,35 @@ public class Setup
       Setup.http = Setup.http.WithWebHostBuilder(builder =>
        {
          builder.UseSetting("https_port", Setup.PORT).UseEnvironment("Testing");
+
+         builder.ConfigureServices(services =>
+         {
+          /*
+          1º como esta classe Setup inicia o bot dos meus teste 
+          eu estou services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServicoMoc>();
+          para que ele resolva a implemetação de minha classe ClientesServicoMoc diante do contrato
+
+          2º ao invês de eu fazer a conexão com a base de dados 3 utilizar o entity-framework,
+          para ir no banco e fazer as requisições. Eu vou fazer um (MOC) desta classe para que ela 
+          possar responder os dados em memoria.
+
+          3º desta forma eu testo o fluxo do http. Eu não vou testar se esta inserindo na base de dados
+          realmente ou não. Para isto seria um (teste de unidade) para testar os serviços se ele grava ou não
           
+          Já os testes de (request) que são os testes de integração o objetivo deste teste é testar
+          o fluxo do http se ele retorna 200 - OK se ele retorna 201 -Created - informação errada BadRequest
+          formato que retorna o formato que tem que enviar para api.
+
+          Lembrando base de dados é o teste de serviço de unidade. Já teste http são testes de integração
+
+          4º Estou substituindo o services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServico>();
+          Statup.
+          Por esta do Setup services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServicoMoc>();
+          Pois esta do Setup é a inicialização dos meus teste.
+          E a da Startup é a inicialização do meu aplicativo.
+          */
+            services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServicoMock>();
+         });
        });
 
        //como eu vou ter que passar em todos os testes 

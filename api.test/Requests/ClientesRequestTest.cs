@@ -11,7 +11,7 @@ namespace api.test.Requests;
 public class ClientesRequestTest
 {
 [ClassInitialize]
-  public static async Task ClassInit(TestContext testContext)
+  public static void ClassInit(TestContext testContext)
   {
     Setup.ClassInit(testContext);
     /*
@@ -29,18 +29,18 @@ public class ClientesRequestTest
       3º Apenas envio por parametro a String que eu quero que execulte.
 
     */
-    await Setup.ExecutaComandoSql("truncate table clientes");
+    //await Setup.ExecutaComandoSql("truncate table clientes");
   }
 
 [ClassCleanup]
-  public static async Task ClassCleanup()
+  public static void ClassCleanup()
   {
     Setup.ClassCleanup();
     /*
      vou fazer um truncate quando eu inicio ([ClassInitialize]) os teste
      e um outro truncate aqui [ClassCleanup] quando eu finalizo 
     */
-    await Setup.ExecutaComandoSql("truncate table clientes");
+    //await Setup.ExecutaComandoSql("truncate table clientes");
   }
 
 
@@ -49,7 +49,7 @@ public class ClientesRequestTest
     {  
         //Eu estou criando um usuário fake para teste
         //O método (FakeClientes()) esta lá no meu Setup
-       await Setup.FakeCliente();
+        //await Setup.FakeCliente();
 
         //vou fazer uma requisição para minha home e o retorno é 200
         var response = await Setup.client.GetAsync("/clientes");
@@ -84,7 +84,11 @@ public class ClientesRequestTest
      [TestMethod]
      public async Task PostDeClientesEmTeste()
      {
-      await Setup.ExecutaComandoSql("truncate table clientes");
+      /*
+       Não preciso execultar truncate na base de dados, pois estou
+      utilizando MOC e não base de dados
+      */
+      //await Setup.ExecutaComandoSql("truncate table clientes");
          /*
          * 1º para fazer o post crio a instância do meu objeto cliente
          * 2º passo os valores
@@ -144,14 +148,24 @@ public class ClientesRequestTest
       Assert.AreEqual("""{"parametroPassado":"Alterando parametro recebido Leandro;","mensagem":"Parabens foi passado parametro por querystring"}""", result);
 
     }
-
+    /*
+    Vamos implementar depois !!!
+    PutClientesPassandoPeloTeste()
+    */
     [TestMethod]
     public async Task PutClientesPassandoPeloTeste()
     {
-     await Setup.ExecutaComandoSql("truncate table clientes");
-     await Setup.FakeCliente(); 
-     var qtdInicial = await Setup.ExecutaEntityCount(1, "Livia");
-     Assert.AreEqual(1, qtdInicial);
+      /*
+       * comentei esta linhas pois não vou mais na minha base de dados
+       * estarei usando a estratefia com (MOC)
+       *
+      */
+     //await Setup.ExecutaComandoSql("truncate table clientes");
+     //await Setup.FakeCliente(); 
+
+     //var qtdInicial = await Setup.ExecutaEntityCount(1, "Livia");
+     //Assert.AreEqual(1, qtdInicial);
+
       /*
       * 1º envio o objeto que será serializado
       * 2º lembrando que nesta instância eu estou passando o ClienteDTO
@@ -195,19 +209,16 @@ public class ClientesRequestTest
 
          Assert.AreEqual("woto", clienteResponse.Nome); 
 
-         /*
-         vou execultar uma query sql na base de dados para ver se meu conteudo 
-         foi realmente alterado.
-         */
-         var qtdFinal = await Setup.ExecutaEntityCount(1, "woto");
-         Assert.AreEqual(1, qtdFinal);     
-
     }
 
     [TestMethod]
     public async Task PutClientesSemNome()
     {
-      await Setup.FakeCliente();
+      /*
+       retirei o Setup.FakeCliente(); pois não preciso mais de cliente fake
+       estou usando a stratégia (MOC)
+      */
+      //await Setup.FakeCliente();
       //estou passando o objeto DTO sem a propriedade nome 
       //então eu espero um erro BadRequest
       var clienteSemNome = new ClienteDTO()
@@ -222,15 +233,19 @@ public class ClientesRequestTest
       
       Assert.AreEqual(HttpStatusCode.BadRequest, rotaPutComParametro.StatusCode);
       Assert.AreEqual("application/json; charset=utf-8", rotaPutComParametro.Content.Headers.ContentType?.ToString());
-      
+      //codigo":234312 É preciso enviar o nome ele é obrigatório
       var result = await rotaPutComParametro.Content.ReadAsStringAsync();
-      Assert.AreEqual("""{"codigo":12345,"mensagem":"É preciso enviar o nome ele é obrigatório"}""", result);
+      Assert.AreEqual("""{"codigo":12345,"mensagem":"O Nome é obrigatório"}""", result);
     }
 
     [TestMethod]
     public async Task DeleteClientes()
     {
-      await Setup.FakeCliente();
+      /*
+       retirei o Setup.FakeCliente(); pois não preciso mais de cliente fake
+       estou usando a stratégia (MOC)
+      */
+      //await Setup.FakeCliente();
       var response = await Setup.client.DeleteAsync($"/clientes/{1}");
       Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
       //não preciso testar o retorno porque se NoContent ele não tem retorno.
@@ -240,33 +255,19 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task DeleteClientesIdNaoExistente()
     {
-      await Setup.ExecutaComandoSql("truncate table clientes");
+      //await Setup.ExecutaComandoSql("truncate table clientes");
       /*
         passando o usuario fake para minha base de dados 
         para ter o que buscar, por id 
       */
-      await Setup.FakeCliente();
+      /*
+       retirei o Setup.FakeCliente(); pois não preciso mais de cliente fake
+       estou usando a stratégia (MOC)
+      */
+      //await Setup.FakeCliente();
       var passandoIdInvalido = await Setup.client.DeleteAsync($"/clientes/{5}");
       Assert.AreEqual(HttpStatusCode.NotFound, passandoIdInvalido.StatusCode);
     }
-/*
-    //iremos fazer o verbo patch lembrando que o patch atualiza partes especificas
-    [TestMethod]
-    public async Task PatchClientes()
-    {
-      var cliente = new ClienteNomeDTO()
-      {
-        Nome = "woto",
-      };
-      var content = new StringContent(JsonSerializer.Serialize(cliente), Encoding.UTF8, "application/json-patch+json");
-      var response = await Setup.client.PatchAsync($"/clientes/{1}", content);
-
-      Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-      Assert.AreEqual("application/json; charset=utf-8", response.Content.Headers.ContentType?.ToString());
-
-     
-    }
-*/
 
     [TestMethod]
     public async Task GetPorIdClienteNaoEncontrado()
@@ -278,14 +279,17 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task GetPorId()
     {
-
-      await Setup.ExecutaComandoSql("truncate table clientes");
+      /*
+       Não preciso execultar truncate na base de dados, pois estou
+      utilizando MOC e não base de dados
+      */
+      //await Setup.ExecutaComandoSql("truncate table clientes");
       /*
         sempre construindo meu usuario fake
         e limpando a base de dados na sequencia em minha 
         classe Staturp.cs =>(fazendo o truncate)
       */
-      await Setup.FakeCliente();
+      //await Setup.FakeCliente();
       var response = await Setup.client.GetAsync($"/clientes/{1}");
       Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }

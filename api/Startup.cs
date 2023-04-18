@@ -283,7 +283,7 @@ public class Startup
         if(string.IsNullOrEmpty(clienteDTO.Nome))
         {
           //se eu não achar o meu cliente na bd eu retorno esta msg de error
-          return Results.NotFound(new Error
+          return Results.BadRequest(new Error
             {
               Codigo = 12345,
               Mensagem = "O Nome é obrigatório"
@@ -301,15 +301,9 @@ public class Startup
              Codigo = 423,
              Mensagem = $"Cliente não encontrado com o id {id}"
           });
-      }      
-       
-       //caso eu ache o meu cliente eu faço o update dele.
-       //o cliente que esta vindo da base de dados (clienteDb)
-        clienteDb.Nome = clienteDTO.Nome;
-        clienteDb.Telefone = clienteDTO.Telefone;
-        clienteDb.Email = clienteDTO.Email;
+      }     
 
-       await clientesServico.Salvar(clienteDb);
+       await clientesServico.Update(clienteDb, clienteDTO);
        return Results.Ok(clienteDb);
      })
       //Pode me retornar um 200Ok se deu tudo certo
