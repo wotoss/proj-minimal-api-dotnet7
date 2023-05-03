@@ -89,7 +89,7 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
        var propPara = clientePara.GetType().GetProperty(propDe.Name);
        if(propPara is not null)
        {
-          propPara.SetValue(clientePara, propPara.GetValue(clienteDe));
+          propPara.SetValue(clientePara, propDe.GetValue(clienteDe));
        }
     }
     this.dbContexto.Clientes.Update(clientePara);
@@ -105,8 +105,5 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
     3º mas quando vou pesistir os dados na banco. Ai eu preciso de todas as informações
   inclusive as sensiveis. Desta forma eu utilizo a (classe)    
   */
-
-  
-
 
 }
