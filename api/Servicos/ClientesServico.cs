@@ -27,10 +27,10 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
     //Se cliente.Id for igual a 0 => eu Adiciono na bd
     //SeNão (quero dizer se o Client.Id for != de zero) eu faço update bd
     //lembrando que como é só um if e else eu não preciso abrir o bloco {}
-     if (cliente.Id == 0)
-     this.dbContexto.Clientes.Add(cliente);
-     else
-     this.dbContexto.Clientes.Update(cliente);
+      if (cliente.Id == 0)
+      this.dbContexto.Clientes.Add(cliente);
+      else
+      this.dbContexto.Clientes.Update(cliente);
 
      await this.dbContexto.SaveChangesAsync(); 
   }

@@ -41,3 +41,14 @@ chmod +x test.sh
 ```shell
 ./run-prod.sh
 ```
+
+# Resumo da aplicação 
+```shell
+#Até este commit fiz o  teste de INTEGRAÇÃO criei a classe ClientesServicoMock.cs
+#e realizei os teste sem precisar da base de dados "em alguns casos até fiz a requisição"
+#na base de dados para mostrar que é possivel.
+#No teste de (INTEGRAÇÃO) eu testo as (REQUISIÇÕES HTTP).
+
+#commit -am "findando teste de integração http mock - ClientesServicoMock.cs"
+
+```
