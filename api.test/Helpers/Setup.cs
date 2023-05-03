@@ -34,7 +34,7 @@ public class Setup
        2º execultar comandos sql de forma generica
      em toda a aplicação (api.teste) caso precise
     */
-    public static async Task ExecutaComandoSql(string sql)
+    public static async Task ExecutaComandoSqlAsync(string sql)
       {
         await new DbContexto().Database.ExecuteSqlRawAsync(sql);
       } 
@@ -44,13 +44,13 @@ public class Setup
     * a nossa string que esta vindo por paramentro ou noss comando
     * é um count => 
     */
-     public static async Task<int> ExecutaEntityCount(int id, string nome)
+     public static async Task<int> ExecutaEntityCountAsync(int id, string nome)
       {
         return await new DbContexto().Clientes.Where(c => c.Id == id && c.Nome == nome).CountAsync();
       }
 
 
-    public static async Task FakeCliente()
+    public static async Task FakeClienteAsync()
     {
       await new DbContexto().Database.ExecuteSqlRawAsync("""
       insert clientes(Nome, Telefone, Email, DataCriacao)
