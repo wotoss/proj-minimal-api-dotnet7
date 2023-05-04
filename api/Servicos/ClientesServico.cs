@@ -8,6 +8,8 @@ namespace proj_minimal_api_dotnet7.Servicos;
 
 public class ClientesServico : IBancoDeDadosServico<Cliente>
 {
+
+  public ClientesServico(){}
   /*
     1º inicio passando o meu contexto para o meu serviço
     2º fazendo a injeção de debendencia no meu contrutor 
@@ -20,9 +22,16 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
   {
      this.dbContexto = dbContexto;
   }
-  private DbContexto dbContexto;
-
-  public async Task Salvar(Cliente cliente)
+  private DbContexto dbContexto = default!;
+  
+  /*
+    neste momento eu acrecentei o virtual 
+    mostrando que esta classe pode ser override (sobescrita)
+    * fiz isto (virtual) devido ao teste de moq.
+    *mas o método continua com as mesmas funcionalidade 
+    "apenas com algo a mais que é o virtual"
+  */
+  public virtual async Task Salvar(Cliente cliente)
   {
     //Se cliente.Id for igual a 0 => eu Adiciono na bd
     //SeNão (quero dizer se o Client.Id for != de zero) eu faço update bd
@@ -32,7 +41,13 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
       else
       this.dbContexto.Clientes.Update(cliente);
 
-     await this.dbContexto.SaveChangesAsync(); 
+      var ret = this.dbContexto.SaveChanges();
+      if(ret != 1)
+       throw new Exception("Não foi possível salvar o dado no banco");
+      await Task.FromResult(ret);
+     
+     //o paralelismo (assincrono) fica por conta do FromResult
+     //await Task.FromResult(this.dbContexto.SaveChanges()); 
   }
 
   public async Task ExcluirPorId(int id)
@@ -66,7 +81,7 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
      * 2º para corrigir este retorno, coloquei FirstOrDefaultAsync, ele dá um retorno com null
      * 3º e tambem passei as (?).
     */
-    Cliente? clientes = await this.dbContexto.Clientes.Where(c => c.Id == id).FirstOrDefaultAsync();
+    Cliente? clientes = await Task.FromResult(this.dbContexto.Clientes.Where(c => c.Id == id).FirstOrDefault());
     return clientes;
   }
 
@@ -75,7 +90,15 @@ public class ClientesServico : IBancoDeDadosServico<Cliente>
   //aqui estamos trazendo todos se tivermos muitos na bd prejudic a performace.
   public async Task<List<Cliente>> Todos()
   {
-    return await this.dbContexto.Clientes.ToListAsync();
+    //return await this.dbContexto.Clientes.ToListAsync();
+    /*
+     se eu quero usar o paralelismo assincrono neste caso dos (teste)
+     é melhor utilizar o Task.FromResult
+
+     desta maneira tambem é Assincrono mas neste caso da erro no teste
+     return await this.dbContexto.Clientes.ToListAsync();
+    */
+    return await Task.FromResult(this.dbContexto.Clientes.ToList());
   }
 
   public async Task Update(Cliente clientePara, object clienteDe)

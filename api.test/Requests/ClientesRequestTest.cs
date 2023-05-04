@@ -178,10 +178,11 @@ public class ClientesRequestTest
         Telefone = "(11) 94704-7361"
 
       };
+      
          
          //preciso transformar JsonSerializer.Serialize(cliente) transformar o (objeto) para (string) com serialize
          var content = new StringContent(JsonSerializer.Serialize(cliente), Encoding.UTF8, "application/json");
-
+         
          //veja que para fazer esta requisição eu passo a rota e objeto content
          //desta forma eu consigo fazer um post de uma string de um objeto parseado.
          //lembrando que a rota de put eu preciso passar id

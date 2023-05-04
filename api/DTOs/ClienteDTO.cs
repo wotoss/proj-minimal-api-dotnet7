@@ -12,7 +12,7 @@ porque com (struct) eu não consigo utilizar o (reflection no meu objeto)
 como vamos transferir dados com o DTO possivelmente usaremos o reflection
 por este motivo é importante que seja uma (classe ou record)
 */
-public record ClienteDTO
+public class ClienteDTO
 {
  /*
  * por ser um objeto DTO (Objeto de Trânsferencia de Dados)

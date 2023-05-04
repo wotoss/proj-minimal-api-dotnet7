@@ -34,5 +34,7 @@ public class DbContexto : DbContext
 
   //para mapear os meus modelos e criar tabela no banco de dados
   //quando eu quero que uma propriedade minha não seja nulla (= default!)
-  public DbSet<Cliente> Clientes { get; set;} = default!;
+
+  //adicionando o virtual esta propriedade fica (override pode ser subescrita)
+  public virtual DbSet<Cliente> Clientes { get; set;} = default!;
 }

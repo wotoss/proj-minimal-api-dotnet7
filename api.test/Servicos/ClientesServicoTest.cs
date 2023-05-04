@@ -14,8 +14,13 @@ public class ClientesServicoTest
     seria a classe inicial
   */
 [ClassInitialize]
-  public static void ClassInit(TestContext testContext)
+  public static async Task ClassInit(TestContext testContext)
   {
+    /*
+      estou utilizando aqui ao invês do truncate dentro do método TestaSalvarDadoNoBanco()
+      mas poderia usar lá tambem.
+    */
+     await Setup.ExecutaComandoSqlAsync("truncate table clientes");
     
   }
 
@@ -24,9 +29,14 @@ public class ClientesServicoTest
   classe de limpar ou fechar
 */
 [ClassCleanup]
-  public static void ClassCleanup()
+  public static async Task ClassCleanup()
   {
-    
+    /*
+      Dou um truncate no inicialização
+      estou utilizando aqui ao invês do truncate dentro do método TestaSalvarDadoNoBanco()
+      mas poderia usar lá tambem.
+    */
+     await Setup.ExecutaComandoSqlAsync("truncate table clientes");
   }
 
 /*
@@ -43,8 +53,11 @@ public class ClientesServicoTest
        3º rodo o truncate no banco e ai eu posso criar um usúario fake.
        "ao dar o truncate eu garanto que a minha tabela esta vazia"
        */       
-
-        await Setup.ExecutaComandoSqlAsync("truncate table clientes");
+        
+        /*
+        comentei ele aqui pois usei dentro da classe =>  ClassCleanup()
+        */
+        //await Setup.ExecutaComandoSqlAsync("truncate table clientes");
 
         var  clientesServico = new ClientesServico(new DbContexto());
 
