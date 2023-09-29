@@ -37,4 +37,6 @@ public class DbContexto : DbContext
 
   //adicionando o virtual esta propriedade fica (override pode ser subescrita)
   public virtual DbSet<Cliente> Clientes { get; set;} = default!;
+
+  public virtual DbSet<Administrador> Administrador { get; set; } = default!;
 }

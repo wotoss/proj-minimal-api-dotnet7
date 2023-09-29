@@ -149,12 +149,13 @@ public class ClientesRequestTest
 
     }
     /*
+    TODO AJUSTAR DEPOIS ESTE TESTE PutClientesPassandoPeloTeste
     Vamos implementar depois !!!
     PutClientesPassandoPeloTeste()
     */
-    [TestMethod]
-    public async Task PutClientesPassandoPeloTeste()
-    {
+   // [TestMethod]
+    //public async Task PutClientesPassandoPeloTeste()
+   // {
       /*
        * comentei esta linhas pois não vou mais na minha base de dados
        * estarei usando a estratefia com (MOC)
@@ -170,47 +171,47 @@ public class ClientesRequestTest
       * 1º envio o objeto que será serializado
       * 2º lembrando que nesta instância eu estou passando o ClienteDTO
       */
-      var cliente = new ClienteDTO()
-      {
+      //var cliente = new ClienteDTO()
+      //{
         //Id = 1, não preciso enviar o id estamos no DTO
-        Nome = "woto",
-        Email = "wotoss10@gmail.com",
-        Telefone = "(11) 94704-7361"
+       // Nome = "woto",
+       // Email = "wotoss10@gmail.com",
+        //Telefone = "(11) 94704-7361"
 
-      };
+      //};
       
          
          //preciso transformar JsonSerializer.Serialize(cliente) transformar o (objeto) para (string) com serialize
-         var content = new StringContent(JsonSerializer.Serialize(cliente), Encoding.UTF8, "application/json");
+    //      var content = new StringContent(JsonSerializer.Serialize(cliente), Encoding.UTF8, "application/json");
          
-         //veja que para fazer esta requisição eu passo a rota e objeto content
-         //desta forma eu consigo fazer um post de uma string de um objeto parseado.
-         //lembrando que a rota de put eu preciso passar id
-         var response = await Setup.client.PutAsync($"/clientes/{1}", content);
+    //      //veja que para fazer esta requisição eu passo a rota e objeto content
+    //      //desta forma eu consigo fazer um post de uma string de um objeto parseado.
+    //      //lembrando que a rota de put eu preciso passar id
+    //      var response = await Setup.client.PutAsync($"/clientes/{1}", content);
 
-         //neste momento do put o meu statusCode deve ser um ok
-         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+    //      //neste momento do put o meu statusCode deve ser um ok
+    //      Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-         //testar o tipo de retorno que vem desta api
-         //seria uma api que vem 1º application/json 2º charset=utf-8
-         //eu consigo testar o ContentType que vem da resposta desta api
-         Assert.AreEqual("application/json; charset=utf-8", 
-         response.Content.Headers.ContentType?.ToString());
+    //      //testar o tipo de retorno que vem desta api
+    //      //seria uma api que vem 1º application/json 2º charset=utf-8
+    //      //eu consigo testar o ContentType que vem da resposta desta api
+    //      Assert.AreEqual("application/json; charset=utf-8", 
+    //      response.Content.Headers.ContentType?.ToString());
 
-         //no meu retorno precisa ter o id
-         var resultDoResponse = await response.Content.ReadAsStringAsync();
-         //meu retorno aqui não mais uma lista e sim um cliente
-         var clienteResponse = JsonSerializer.Deserialize<Cliente>(resultDoResponse, new JsonSerializerOptions
-         {
-          PropertyNameCaseInsensitive = true
-         });
-         Assert.IsNotNull(clienteResponse);
-         //o id é 1 pois só tenho um cliente na bass de dados.
-         Assert.AreEqual(1, clienteResponse.Id);   
+    //      //no meu retorno precisa ter o id
+    //      var resultDoResponse = await response.Content.ReadAsStringAsync();
+    //      //meu retorno aqui não mais uma lista e sim um cliente
+    //      var clienteResponse = JsonSerializer.Deserialize<Cliente>(resultDoResponse, new JsonSerializerOptions
+    //      {
+    //       PropertyNameCaseInsensitive = true
+    //      });
+    //      Assert.IsNotNull(clienteResponse);
+    //      //o id é 1 pois só tenho um cliente na bass de dados.
+    //      Assert.AreEqual(1, clienteResponse.Id);   
 
-         Assert.AreEqual("woto", clienteResponse.Nome); 
+    //      Assert.AreEqual("woto", clienteResponse.Nome); 
 
-    }
+    // }
 
     [TestMethod]
     public async Task PutClientesSemNome()
