@@ -6,8 +6,11 @@ using proj_minimal_api_dotnet7.Models;
 
 
 namespace proj_minimal_api_dotnet7.Servicos;
+//Detalhe: quando eu (:) herdo de ILogin eu tambem estou herdado o que tem
+//em IBancoDeDados. 
+//Porque lá no ILogin já temos esta herança
 
-public class AdministradoresServico : IBancoDeDadosServico<Administrador>
+public class AdministradoresServico : ILogin<Administrador>
 {
 
   public AdministradoresServico(){}
@@ -26,12 +29,12 @@ public class AdministradoresServico : IBancoDeDadosServico<Administrador>
   private DbContexto dbContexto = default!;
 
 
-  public virtual async Task<Administrador?> Login(string email, string senha)
+  public virtual async Task<Administrador?> LoginAsync(string email, string senha)
   {
     return await Task.FromResult(
         this.dbContexto.Administrador
         .Where(a => a.Email == email && a.Senha == senha)
-        .First()
+        .FirstOrDefault()
     );
   }
   

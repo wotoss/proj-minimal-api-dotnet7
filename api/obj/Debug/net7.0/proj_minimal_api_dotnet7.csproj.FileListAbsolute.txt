@@ -122,3 +122,4 @@ C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api\bin\Debug\ne
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api\bin\Debug\net7.0\Reliase\Release\appsettings.Sample.json
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api\bin\Debug\net7.0\Reliase\Release\proj_minimal_api_dotnet7.deps.json
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api\bin\Debug\net7.0\Reliase\Release\proj_minimal_api_dotnet7.runtimeconfig.json
+C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
