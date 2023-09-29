@@ -1,0 +1,1 @@
+curl -d '{"Nome":"Livia", "Telefone":"(11) 3333-3334", "Email":"livia.santana@Gmail.com"}' -H "Content-Type: application/json" -X POST http://localhost:5227/clientes
