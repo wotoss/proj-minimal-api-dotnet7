@@ -90,7 +90,7 @@ public class AdministradoresServicoMockEntityTest
       };
       var data = lista.AsQueryable();    
       var AdministradoresServico = new AdministradoresServico(contextMock(data));
-      var adm =  await AdministradoresServico.Login("wotoss10@gmail.com", "02289-6wa");
+      var adm =  await AdministradoresServico.LoginAsync("wotoss10@gmail.com", "02289-6wa");
       
       //tem que vir um usuário
       Assert.IsNotNull(adm);     

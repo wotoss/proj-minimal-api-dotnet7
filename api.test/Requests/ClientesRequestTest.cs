@@ -1,9 +1,12 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Api.Test.Helpers;
+using Api.Test.Mock;
 using proj_minimal_api_dotnet7.DTOs;
 using proj_minimal_api_dotnet7.Models;
+using proj_minimal_api_dotnet7.Servicos;
 
 namespace api.test.Requests;
 
@@ -14,6 +17,8 @@ public class ClientesRequestTest
   public static void ClassInit(TestContext testContext)
   {
     Setup.ClassInit(testContext);
+
+
     /*
      * 1º toda vez que a applicação iniciar em modo teste
      ela vai dar um (tuncate) na tabela (clientes)
@@ -47,6 +52,8 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task GetDeClientesEmTeste()
     {  
+
+       await SetHeaderToken();
         //Eu estou criando um usuário fake para teste
         //O método (FakeClientes()) esta lá no meu Setup
         //await Setup.FakeCliente();
@@ -84,6 +91,8 @@ public class ClientesRequestTest
      [TestMethod]
      public async Task PostDeClientesEmTeste()
      {
+
+      await SetHeaderToken();
       /*
        Não preciso execultar truncate na base de dados, pois estou
       utilizando MOC e não base de dados
@@ -216,6 +225,8 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task PutClientesSemNome()
     {
+       await SetHeaderToken();
+
       /*
        retirei o Setup.FakeCliente(); pois não preciso mais de cliente fake
        estou usando a stratégia (MOC)
@@ -243,6 +254,8 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task DeleteClientes()
     {
+       await SetHeaderToken();
+
       /*
        retirei o Setup.FakeCliente(); pois não preciso mais de cliente fake
        estou usando a stratégia (MOC)
@@ -257,6 +270,8 @@ public class ClientesRequestTest
     [TestMethod]
     public async Task DeleteClientesIdNaoExistente()
     {
+       await SetHeaderToken();
+       
       //await Setup.ExecutaComandoSql("truncate table clientes");
       /*
         passando o usuario fake para minha base de dados 
@@ -301,4 +316,36 @@ public class ClientesRequestTest
     * fazendo estes testes de integração na api
     * eu não preciso utilizar insominia, postman, swagger.
     */
+
+
+    private async Task SetHeaderToken()
+    {
+      if(Setup.client.DefaultRequestHeaders.Authorization is not null) return;
+          
+    //MAIS UM TESTE AUTENTICAÇÃO
+       var loginDTO = new LoginDTO()
+         {
+          Email = "wotoss10@gmail.com",
+          Senha = "123456"
+         };
+         //preciso transformar JsonSerializer.Serialize(cliente) transformar o (objeto) para (string) com serialize
+         var content = new StringContent(JsonSerializer.Serialize(loginDTO), Encoding.UTF8, "application/json");
+         var response = await Setup.client.PostAsync("/login", content);
+
+         //no meu retorno precisa ter o id
+         var resultDoResponse = await response.Content.ReadAsStringAsync();
+         //meu retorno aqui não mais uma lista e sim um cliente
+         var admLogado = JsonSerializer.Deserialize<AdministradorLogadoDTO>(resultDoResponse, new JsonSerializerOptions
+         {
+          PropertyNameCaseInsensitive = true
+         });
+
+         var token = admLogado?.Token;
+    //FIM
+
+
+
+    //no momento que eu crio o teste eu já faço a autenticação
+    Setup.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
 }

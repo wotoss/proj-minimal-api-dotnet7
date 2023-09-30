@@ -466,3 +466,4 @@ C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api.test\bin\Deb
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api.test\bin\Debug\net7.0\Reliase\Release\proj_minimal_api_dotnet7.runtimeconfig.json
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api.test\bin\Debug\net7.0\Castle.Core.dll
 C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api.test\bin\Debug\net7.0\Moq.dll
+C:\projeto-desenvolvimento-minimal-api\proj_minimal_api_dotnet7\api.test\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

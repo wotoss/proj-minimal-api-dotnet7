@@ -99,6 +99,7 @@ public class Setup
           E a da Startup é a inicialização do meu aplicativo.
           */
             services.AddScoped<IBancoDeDadosServico<Cliente>, ClientesServicoMock>();
+            services.AddScoped<ILogin<Administrador>, AdministradoresServicoMock>();
          });
        });
 
