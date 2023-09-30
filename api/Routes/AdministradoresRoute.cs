@@ -42,7 +42,7 @@ internal struct AdministradoresRoute
       var adm = new AdministradorLogadoDTO
       {
         Email = admEncontrado.Email,
-        Senha = admEncontrado.Senha,
+        
         Permissao = admEncontrado.Permissao,
         //lembrando: que estou gerando o token para o administrador
         //que foi encontrado na busca.

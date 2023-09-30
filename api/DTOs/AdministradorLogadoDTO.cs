@@ -25,7 +25,7 @@ public record AdministradorLogadoDTO
   //estou passando todas as propriedades como
   //(required) ou seja não conseguirei (criar o objeto) 
   //se tiver faltando alguma informação
-  public required string Senha {get; set; }
+ 
 
   //esta (permissão) é o (perfil) do usuário
   public required string Permissao { get; set; } 
